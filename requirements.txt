@@ -1,1 +1,6 @@
 dash
+dash_ag_grid
+pandas
+geopandas
+dash-bootstrap-components
+pymongo[srv]
