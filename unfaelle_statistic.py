@@ -3,7 +3,7 @@ import os
 
 import geopandas as gpd
 
-FILENAME = "stats_all.json"
+FILEPATH = "data/stats_all.json"
 
 
 def get_data(year):
@@ -43,11 +43,11 @@ def append_dict_to_json(file_path, new_data):
 
 
 if "__main__" == __name__:
-    with open(FILENAME, 'w') as f:
+    with open(FILEPATH, 'w') as f:
         json.dump([], f)
     for year in range(2011, 2024):
         print(f"Processing year {year}")
         gdf = get_data(year)
         stats = make_stats(gdf, year)
-        append_dict_to_json(FILENAME, stats)
+        append_dict_to_json(FILEPATH, stats)
     print("Done!")
