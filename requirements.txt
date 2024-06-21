@@ -4,3 +4,5 @@ pandas
 geopandas
 dash-bootstrap-components
 pymongo[srv]
+uvicorn
+fastapi

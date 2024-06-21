@@ -70,7 +70,8 @@ app.layout = html.Div([
         id='graph-type',
         options=[{'label': i, 'value': i} for i in ['Bar', 'Pie']],
         value='Bar',
-        labelStyle={'display': 'inline-block'}
+        labelStyle={'display': 'inline-block', 'margin': '10px'},
+        style={'color': 'lightgray', 'textAlign': 'right'}
     ),
 
     html.Div([
@@ -78,11 +79,12 @@ app.layout = html.Div([
         dcc.Loading(dcc.Graph(id="graph-pie"), type="graph"),
     ], className="table-pie-container"),
     html.Div([
-        html.Pre(children="Source: Swiss Accident Data"),
+        html.Pre(children="Source: FEDRO - Federal Roads Office"),
         html.A(
-            children='Data Source',
-            href='https://opendata.swiss',
+            children='Data',
+            href='https://data.geo.admin.ch/browser/index.html#/collections/ch.astra.unfaelle-personenschaeden_alle',
             target='_blank',  # This makes the link open in a new tab
+            className='source-link'
         )
     ], className='source-data')
 ])
