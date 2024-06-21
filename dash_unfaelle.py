@@ -9,7 +9,7 @@ import dash_bootstrap_components as dbc
 external_stylesheets = [dbc.themes.CYBORG, 'assets/style.css']
 
 # filepath = 'data/unfaelle-personenschaeden_alle_4326.json/RoadTrafficAccidentLocations.json'
-#filepath = 'data/unfaelle_small_1000.geojson'  # small sample file
+# filepath = 'data/unfaelle_small_1000.geojson'  # small sample file
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 

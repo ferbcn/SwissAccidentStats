@@ -44,20 +44,8 @@ def update_map(year):
     print(df.columns)
     print(df.head())
 
-    # Create a subplot for the bar chart and another for the line plots
-    fig = make_subplots(specs=[[{"secondary_y": True}]])
-
-    # Add line plot for each column except "Total" to the second subplot
-    for column in df.columns[1:-1]:  # Exclude "Total" from the line plot
-        fig.add_trace(
-            go.Scatter(
-                x=df["year"],
-                y=df[column],
-                mode='lines',
-                name=column,
-            ),
-            secondary_y=True,
-        )
+    # fig = make_subplots(specs=[[{"secondary_y": True}]])
+    fig = px.line(df, x="year", y=df.columns[1:-1])
 
     # Add bar chart for "Total" to the first subplot
     fig.add_trace(
@@ -65,15 +53,14 @@ def update_map(year):
             x=df["year"],
             y=df["Total"],
             name="Total",
-            marker=dict(color='darkgray'),
+            marker=dict(color='lightblue'),
         ),
-        secondary_y=False,
     )
 
     fig.update_layout(
         # position legend below plot
-        legend=dict(orientation="h", y=-0.8, x=0.5, xanchor='center', yanchor='bottom'),
-        plot_bgcolor='dimgray',
+        legend=dict(orientation="h", y=-0.4, x=0.5, xanchor='center', yanchor='bottom'),
+        plot_bgcolor='rgba(0,0,0,0)',
         coloraxis_showscale=False,
         paper_bgcolor='rgba(0,0,0,0)',
         font=dict(color='lightgray'),
@@ -85,6 +72,7 @@ def update_map(year):
         ),
     )
     fig.update_xaxes(dtick=1)
+    fig.update_yaxes(showgrid=False)  # This line removes the horizontal gridlines
     return fig
 
 
