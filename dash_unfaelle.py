@@ -10,12 +10,15 @@ import dash_bootstrap_components as dbc
 
 from mongo_data_layer import MongoClient
 
+_TITLE = "Unfälle mit Personenschäden Schweiz 2012-2023"
+
 mc = MongoClient("unfaelle-schweiz")
 
 # Use a Bootstrap CSS URL
 external_stylesheets = [dbc.themes.CYBORG, 'assets/style.css']
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+app.title = _TITLE
 
 # Create the table style
 table_style = {'backgroundColor': 'transparent', 'color': 'lightgray', 'textAlign': 'left',
@@ -53,7 +56,7 @@ def generate_pie(labels, values, graph_type="Bar"):
 
 
 app.layout = html.Div([
-    html.H3("Unfälle mit Personenschäden Schweiz"),
+    html.H3(_TITLE),
     html.Div([
                 "Jahr: ", dcc.Dropdown(value=2023,
                                      id="year_selector",
