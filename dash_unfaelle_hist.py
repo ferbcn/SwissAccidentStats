@@ -33,13 +33,14 @@ def update_map(year):
         # Expand the JSON data into separate columns
         expanded_df = df[column].apply(pd.Series)
         # Rename the new columns to include the original column name as a prefix
-        expanded_df = expanded_df.add_prefix(f'{column}_')
+        # expanded_df = expanded_df.add_prefix(f'{column}_')
         # Drop the original column
         df = df.drop(columns=[column])
         # Concatenate the new columns with the original DataFrame
         df = pd.concat([df, expanded_df], axis=1)
+
     # Add column "Total" to sum up all values of bike_false and bike_true
-    df["Total"] = df["bikes_false"] + df["bikes_true"]
+    df["Total"] = df["false"] + df["true"]
 
     print(df.columns)
     print(df.head())
@@ -59,7 +60,7 @@ def update_map(year):
 
     fig.update_layout(
         # position legend below plot
-        legend=dict(orientation="h", y=-0.4, x=0.5, xanchor='center', yanchor='bottom'),
+        legend=dict(title="", orientation="h", y=-0.3, x=0.5, xanchor='center', yanchor='bottom'),
         plot_bgcolor='rgba(0,0,0,0)',
         coloraxis_showscale=False,
         paper_bgcolor='rgba(0,0,0,0)',
