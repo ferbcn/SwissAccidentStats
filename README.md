@@ -1,6 +1,6 @@
-### Swiss Accident Statistics and Maps (2011-2023)
+# Swiss Accident Statistics and Maps (2011-2023)
 
-# Tech Stack
+## Tech Stack
 * Uvicorn/FastApi
 * Plotly Dash
 * MongoDB
