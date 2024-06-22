@@ -58,15 +58,20 @@ def generate_chart(labels, values, graph_type="Bar"):
 app.layout = html.Div([
     html.H3(_TITLE),
     html.Div([
-                "Jahr: ", dcc.Dropdown(value=2023,
-                                     id="year_selector",
-                                     options=[{"label": x, "value": x} for x in range(2011, 2024)], className="ddown"),
-                "Classification: ", dcc.Dropdown(
-                                     value="AccidentType_de",
-                                     id="class_selector",
-                                     options=[{"label": "Types", "value": "AccidentType_de"},
-                                              {"label": "Severity", "value": "AccidentSeverityCategory_de"}], className="ddown")
-              ], className="ddown-container"),
+        html.Div([
+            "Jahr: ", dcc.Dropdown(value=2023,
+                             id="year_selector",
+                             options=[{"label": x, "value": x} for x in range(2011, 2024)], className="ddown"),
+        ], className='ddown'),
+        html.Div([
+            "Classification: ", dcc.Dropdown(
+                             value="AccidentType_de",
+                             id="class_selector",
+                             options=[{"label": "Types", "value": "AccidentType_de"},
+                                      {"label": "Severity", "value": "AccidentSeverityCategory_de"}], className="ddown")
+        ], className='ddown'),
+       ], className="ddown-container"),
+
     dcc.Loading(dcc.Graph(id='map', config={'scrollZoom': True}, style={'height': '60vh'}), type='circle'),
 
     dcc.RadioItems(
