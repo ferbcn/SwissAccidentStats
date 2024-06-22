@@ -23,6 +23,9 @@ body{
 
 .ddown{
     min-width: 150px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
 }
 
 .source-data{
