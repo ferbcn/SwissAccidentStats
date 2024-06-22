@@ -85,7 +85,7 @@ app.layout = html.Div([
     html.Div([
         dash_table.DataTable(id='table', style_cell=table_style, style_header=table_header_style),
         dcc.Loading(dcc.Graph(id="graph-pie"), type="circle"),
-        dcc.Graph(id="graph-bar"),  # New Div for the bar chart
+        dcc.Loading(dcc.Graph(id="graph-bar"), type="circle"),
     ], className="table-pie-container"),
     html.Div([
         html.Pre(children="Source: FEDRO - Federal Roads Office"),
