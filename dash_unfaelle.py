@@ -34,7 +34,7 @@ def get_data(year):
     return gpd.read_file(filepath)
 
 
-def generate_pie(labels, values, graph_type="Bar"):
+def generate_chart(labels, values, graph_type="Bar"):
     if graph_type == "Pie":
         fig = go.Figure(go.Pie(labels=labels, values=values,
                                textinfo='label+percent',
@@ -80,6 +80,7 @@ app.layout = html.Div([
     html.Div([
         dash_table.DataTable(id='table', style_cell=table_style, style_header=table_header_style),
         dcc.Loading(dcc.Graph(id="graph-pie"), type="graph"),
+        dcc.Loading(dcc.Graph(id="graph-bar"), type="graph"),  # New Div for the bar chart
     ], className="table-pie-container"),
     html.Div([
         html.Pre(children="Source: FEDRO - Federal Roads Office"),
@@ -98,11 +99,11 @@ app.layout = html.Div([
     Output('table', 'columns'),
     Output('table', 'data'),
     Output("graph-pie", "figure"),
+    Output("graph-bar", "figure"),  # New output for the bar chart
     Input('year_selector', 'value'),
     Input('class_selector', 'value'),
-    Input('graph-type', 'value')
 )
-def update_map(year, class_type,  graph_type):
+def update_map(year, class_type):
     print(f"Collecting and displaying data for year {year}...")
     # convert mongo db collection to geopandas dataframe
     init = time.time()
@@ -163,9 +164,22 @@ def update_map(year, class_type,  graph_type):
         labels = [k for k in counts_severity.keys()]
         values = [v for v in counts_severity.values]
 
-    fig_pie = generate_pie(labels, values, graph_type)
+    fig_pie = generate_chart(labels, values, "Pie")  # Always generate the pie chart
+    fig_bar = generate_chart(labels, values, "Bar")  # Always generate the bar chart
 
-    return (fig, columns, table_data, fig_pie)
+    return fig, columns, table_data, fig_pie, fig_bar  # Return both charts
+
+
+@app.callback(
+    Output('graph-pie', 'style'),
+    Output('graph-bar', 'style'),
+    Input('graph-type', 'value')
+)
+def toggle_graphs(graph_type):
+    if graph_type == 'Pie':
+        return {'display': 'block'}, {'display': 'none'}
+    else:
+        return {'display': 'none'}, {'display': 'block'}
 
 
 if __name__ == '__main__':
