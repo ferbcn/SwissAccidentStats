@@ -7,7 +7,7 @@ class MongoClient():
         db_pass = os.getenv("MONGODB_PASS")
         db_user = os.getenv("MONGODB_USER")
         db_url = os.getenv("MONGODB_URL")
-        uri = f"mongodb+srv://{db_user}:{db_pass}@{db_url}"
+        uri = f"mongodb://{db_user}:{db_pass}@{db_url}"
         client = pymongo.MongoClient(uri)
         db = client.myDatabase
         self.my_collection = db[collection]
@@ -42,8 +42,13 @@ class MongoClient():
 
 
 if "__main__" == __name__:
-    client = MongoClient("test_collection")
-    mock_documents = [{'key1': 'value1'}, {'key2': 'value2'}]
-    result = client.insert_many_documents(mock_documents)
-    print(len(result.inserted_ids))
+    # client = MongoClient("test_collection")
+    # mock_documents = [{'key1': 'value1'}, {'key2': 'value2'}]
+    # result = client.insert_many_documents(mock_documents)
+    # print(len(result.inserted_ids))
+    client = MongoClient("unfaelle-schweiz")
+    cursor = client.get_most_recent_doc_from_collection()
+    print(list(cursor))
+    docs = client.get_docs_from_collection("properties.AccidentYear", "2022")
+    print(list(docs.limit(1000)))
 

@@ -114,7 +114,7 @@ def update_map(year, class_type):
     init = time.time()
     docs = mc.get_docs_from_collection("properties.AccidentYear", str(year))
     gdf = pd.DataFrame(docs)
-    print(f"Time to convert to GeoDataFrame: {time.time() - init:.2f} seconds")
+    print(f"Time to fetch data from MongodDB and convert to GeoDataFrame: {time.time() - init:.2f} seconds")
 
     init = time.time()
     # reformat geometry and properties columns
