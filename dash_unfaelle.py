@@ -10,7 +10,7 @@ import dash_bootstrap_components as dbc
 
 from mongo_data_layer import MongoClient
 
-_TITLE = "Unfälle mit Personenschäden Schweiz 2012-2023"
+_TITLE = "Unfälle mit Personenschäden Schweiz 2011-2023"
 
 mc = MongoClient("unfaelle-schweiz")
 
@@ -27,11 +27,6 @@ table_style = {'backgroundColor': 'transparent', 'color': 'lightgray', 'textAlig
 # Create the table header style
 table_header_style = {'backgroundColor': 'transparent', 'color': 'lightgray', 'textAlign': 'left',
                       'fontWeight': 'bold'}
-
-def get_data(year):
-    filepath = f"data/unfaelle_{year}.geojson"
-    print(f"Reading file {filepath}...")
-    return gpd.read_file(filepath)
 
 
 def generate_chart(labels, values, graph_type="Bar"):
@@ -60,17 +55,17 @@ app.layout = html.Div([
     html.Div([
         html.Div([
             "Jahr: ", dcc.Dropdown(value=2023,
-                             id="year_selector",
-                             options=[{"label": x, "value": x} for x in range(2011, 2024)], className="ddown"),
+                                   id="year_selector",
+                                   options=[{"label": x, "value": x} for x in range(2011, 2024)], className="ddown"),
         ], className='ddown'),
         html.Div([
             "Classification: ", dcc.Dropdown(
-                             value="AccidentType_de",
-                             id="class_selector",
-                             options=[{"label": "Types", "value": "AccidentType_de"},
-                                      {"label": "Severity", "value": "AccidentSeverityCategory_de"}], className="ddown")
+                value="AccidentType_de",
+                id="class_selector",
+                options=[{"label": "Types", "value": "AccidentType_de"},
+                         {"label": "Severity", "value": "AccidentSeverityCategory_de"}], className="ddown")
         ], className='ddown'),
-       ], className="ddown-container"),
+    ], className="ddown-container"),
 
     dcc.Loading(dcc.Graph(id='map', config={'scrollZoom': True}, style={'height': '60vh'}), type='circle'),
 
@@ -137,7 +132,7 @@ def update_map(year, class_type):
     fig = px.scatter_mapbox(gdf, lat='lat', lon='lon',
                             color=class_type,
                             zoom=7,
-                            size=[10]*len(gdf),
+                            size=[10] * len(gdf),
                             mapbox_style="open-street-map",
                             color_continuous_scale="inferno",
                             hover_data=['AccidentType_de', 'AccidentSeverityCategory_de', 'AccidentInvolvingBicycle'],

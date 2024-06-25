@@ -29,6 +29,9 @@ class MongoClient():
     def get_docs_from_collection(self, key, value) -> pymongo.CursorType:
         return self.my_collection.find({key: value})
 
+    def get_single_doc_from_collection(self, key, value) -> pymongo.CursorType:
+        return self.my_collection.find_one({key: value})
+
     def delete_doc_from_collection(self, key, value) -> pymongo.results.DeleteResult:
         try:
             res = self.my_collection.delete_many({key: value})
