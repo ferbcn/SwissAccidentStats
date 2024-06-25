@@ -10,7 +10,7 @@ import dash_bootstrap_components as dbc
 
 from mongo_data_layer import MongoClient
 
-_TITLE = "Unfälle mit Fahrrädern"
+_TITLE = "Unfälle Schweiz"
 
 mc = MongoClient("unfaelle-schweiz-stats")
 
@@ -28,10 +28,17 @@ table_style = {'backgroundColor': 'transparent', 'color': 'lightgray', 'textAlig
 table_header_style = {'backgroundColor': 'transparent', 'color': 'lightgray', 'textAlign': 'left',
                       'fontWeight': 'bold'}
 
+custom_colors = {
+    "Unfall mit Leichtverletzten": "LightGreen",
+    "Unfall mit Schwerverletzten": "Gold",
+    "Unfall mit Getöteten": "Crimson"
+}
+
+ddown_options = [{"label": "Fussgänger", "value": "pedestrianYearly"}, {"label": "Velos", "value": "bikesYearly"}]
 
 app.layout = html.Div([
     html.H3(_TITLE),
-    dcc.Dropdown([y for y in range(2011, 2024)], 2011, id="year_selector", style={"display": "none"}),
+    dcc.Dropdown(options=ddown_options, value="pedestrianYearly", id="cat_selector", className="ddown"),
     dcc.Loading(dcc.Graph(id='graph', config={'scrollZoom': True}, style={'height': '55vh'}), type='circle'),
     dcc.Loading(dcc.Graph(id='graph-total', config={'scrollZoom': True}, style={'height': '30vh'}), type='circle'),
 ])
@@ -39,36 +46,29 @@ app.layout = html.Div([
 @app.callback(
     Output('graph', 'figure'),
     Output('graph-total', 'figure'),
-    Input('year_selector', 'value'),
+    Input('cat_selector', 'value'),
 )
-def update_map(year):
+def update_map(cat):
     print(f"Collecting and displaying data for year...")
     variable = 'AccidentYear'
-    # convert mongo db collection to geopandas dataframe
 
-    # counts = pd.read_json("data/bike_stats.json")
-    doc = mc.get_single_doc_from_collection("accidentStat", "bikesYearly")
+    doc = mc.get_single_doc_from_collection("accidentStat", cat)
     counts = pd.DataFrame(doc["data"])
 
     print(counts.columns)
     print(counts)
 
-    # mc.drop_collection()
-    # doc_count = {"accidentStat": "bikesYearly", "data": counts.to_dict(orient="records")}
-    # res = mc.insert_many_documents([doc_count])
-    # print(f"Inserted {len(res.inserted_ids)} documents into MongoDB")
-
     # bar chart
     fig = px.bar(counts, title="Accident Categories", x="AccidentType_de", y="count",
                 animation_frame=variable, animation_group="AccidentType_de",
                 color="AccidentSeverityCategory_de", hover_name="AccidentType_de",
-                color_discrete_map={
-                "AccidentSeverityCategory_de": {"Unfall mit Getöteten": "red",
-                                                "Unfall mit Schwerverletzten": "yellow",
-                                                "Unfall mit Leichtverletzten": "blue",
-                                                }},
                 custom_data=['AccidentType_de', 'AccidentSeverityCategory_de', 'count'],
-                 )
+                category_orders={
+                     "AccidentSeverityCategory_de": ["Unfall mit Leichtverletzten", "Unfall mit Schwerverletzten",
+                                                     "Unfall mit Getöteten"]},
+                # text='count',
+                color_discrete_map=custom_colors,
+                )
 
     fig.update_traces(hovertemplate="Type: %{customdata[0]} "
                                     "<br>Severity: %{customdata[1]} "
@@ -77,7 +77,7 @@ def update_map(year):
     fig.update_yaxes(range=[0, 2500])
     fig.update_xaxes(title="")
     fig.update_layout(
-        legend=dict(title="", orientation="h", y=1, x=0.5, xanchor='center', yanchor='bottom'),
+        legend=dict(title="", orientation="h", y=0.95, x=0.5, xanchor='center', yanchor='bottom'),
         coloraxis_showscale=False,
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
@@ -94,12 +94,12 @@ def update_map(year):
 
     fig_total = px.bar(total_counts, x='AccidentYear', y='count', title='Total Accidents',
                        color="AccidentSeverityCategory_de", hover_name="AccidentType_de",
-                       color_discrete_map={
-                           "AccidentSeverityCategory_de": {"Unfall mit Getöteten": "red",
-                                                           "Unfall mit Schwerverletzten": "yellow",
-                                                           "Unfall mit Leichtverletzten": "blue",
-                                                           }},
                        text='count',
+                       category_orders={
+                           "AccidentSeverityCategory_de": ["Unfall mit Leichtverletzten", "Unfall mit Schwerverletzten",
+                                                           "Unfall mit Getöteten"]},
+                       custom_data = ['count'],
+                       color_discrete_map=custom_colors,  # Add this line
                        )
     fig_total.update_layout(
         legend=dict(title="", orientation="h", y=-0.2, x=0.5, xanchor='center', yanchor='bottom'),
@@ -111,7 +111,9 @@ def update_map(year):
         margin={"r": 0, "t": 50, "l": 0, "b": 20},
     )
     fig_total.update_xaxes(dtick=1, title="")
-    fig_total.update_traces(textposition='outside')
+    fig_total.update_traces(textposition='outside',
+                            hovertemplate=None,
+                            )
 
     return fig, fig_total
 
