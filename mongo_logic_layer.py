@@ -4,25 +4,34 @@ import time
 from mongo_data_layer import MongoClient
 
 mc = MongoClient("unfaelle-schweiz")
-mc1 = MongoClient("unfaelle-schweiz-stats")
+mc_stats = MongoClient("unfaelle-schweiz-stats")
+
 
 def collect_and_transform_data_to_dataframe():
     variable = 'AccidentYear'
 
     init = time.time()
     # docs = mc.get_docs_from_collection("properties.AccidentYear", str(year))
-    docs = mc.get_docs_from_collection("properties.AccidentInvolvingBicycle", "true")
-    #docs = mc.get_all_docs_from_collection()
+    # docs = mc.get_docs_from_collection("properties.AccidentInvolvingBicycle", "true")
+    docs = mc.get_all_docs_from_collection()
 
     gdf = pd.DataFrame(docs)
     print(f"Time to fetch data from MongodDB and convert to GeoDataFrame: {time.time() - init:.2f} seconds")
 
     init = time.time()
     # reformat geometry and properties columns
-    df = pd.DataFrame.from_records(gdf['properties'].tolist())
-    df_geo = pd.DataFrame.from_records(gdf['geometry'].tolist())
-    df_geo = pd.DataFrame.from_records(df_geo['coordinates'].tolist())
+    # df = pd.DataFrame.from_records(gdf['properties'].tolist())
+    # df_geo = pd.DataFrame.from_records(gdf['geometry'].tolist())
+    # df_geo = pd.DataFrame.from_records(df_geo['coordinates'].tolist())
+    # df_geo.rename(columns={1: "lat", 0: "lon"}, inplace=True)
+    # reformat geometry and properties columns
+    df = pd.DataFrame([x for x in gdf['properties'].tolist() if x is not None and hasattr(x, '__iter__')])
+    df_geo = pd.DataFrame.from_records(
+        [x for x in gdf['geometry'].tolist() if x is not None and hasattr(x, '__iter__')])
+    df_geo = pd.DataFrame.from_records(
+        [x for x in df_geo['coordinates'].tolist() if x is not None and hasattr(x, '__iter__')])
     df_geo.rename(columns={1: "lat", 0: "lon"}, inplace=True)
+
     # combine the two dataframes
     gdf = pd.concat([df, df_geo], axis=1)
     print(f"Time to transform DataFrame: {time.time() - init:.2f} seconds")
@@ -44,6 +53,6 @@ if __name__ == "__main__":
     print(counts_df.columns)
     print(counts_df)
 
-    doc_count = {"accidentStat": "bikesYearly", "data": counts_df.to_dict(orient="records")}
-    res = mc1.insert_many_documents([doc_count])
+    doc_count = {"accidentStat": "allYearly", "data": counts_df.to_dict(orient="records")}
+    res = mc_stats.insert_many_documents([doc_count])
     print(f"Inserted {len(res.inserted_ids)} documents into MongoDB")

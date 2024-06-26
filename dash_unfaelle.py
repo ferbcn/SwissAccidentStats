@@ -1,12 +1,12 @@
 import time
 
 import dash
-import geopandas as gpd
 import pandas as pd
-from dash import html, dcc, dash_table, Input, Output
+from dash import html, dcc, dash_table, Input, Output, State
 from plotly import express as px
 import plotly.graph_objects as go
 import dash_bootstrap_components as dbc
+
 
 from mongo_data_layer import MongoClient
 
@@ -28,6 +28,15 @@ table_style = {'backgroundColor': 'transparent', 'color': 'lightgray', 'textAlig
 table_header_style = {'backgroundColor': 'transparent', 'color': 'lightgray', 'textAlign': 'left',
                       'fontWeight': 'bold'}
 
+custom_colors = {
+    "Unfall mit Leichtverletzten": "Lightgreen",
+    "Unfall mit Schwerverletzten": "Gold",
+    "Unfall mit Getöteten": "Crimson"
+}
+
+ddown_options = [{"label": x, "value": str(x)} for x in range(2011, 2024)]
+ddown_options.append({"label": "All", "value": "all"})
+
 
 def generate_chart(labels, values, graph_type="Bar"):
     if graph_type == "Pie":
@@ -40,6 +49,7 @@ def generate_chart(labels, values, graph_type="Bar"):
     else:
         fig = go.Figure(go.Bar(x=labels, y=values, text=values, textposition='outside',
                                marker=dict(color=px.colors.qualitative.Plotly)))
+
     fig.update_layout(title_font={'size': 12, 'color': 'lightgray'},
                       plot_bgcolor='rgba(0,0,0,0)',
                       paper_bgcolor='rgba(0,0,0,0)',
@@ -51,12 +61,24 @@ def generate_chart(labels, values, graph_type="Bar"):
 
 
 app.layout = html.Div([
+
+    dbc.Modal(
+        [
+            dbc.ModalHeader("Notice"),
+            dbc.ModalBody("Long loading time!"),
+            dbc.ModalFooter(
+                dbc.Button("Close", id="close", className="ml-auto")
+            ),
+        ],
+        id="modal",
+    ),
+
     html.H3(_TITLE),
     html.Div([
         html.Div([
-            "Jahr: ", dcc.Dropdown(value=2023,
+            "Jahr: ", dcc.Dropdown(value="2023",
                                    id="year_selector",
-                                   options=[{"label": x, "value": x} for x in range(2011, 2024)], className="ddown"),
+                                   options=ddown_options, className="ddown"),
         ], className='ddown'),
         html.Div([
             "Classification: ", dcc.Dropdown(
@@ -67,7 +89,7 @@ app.layout = html.Div([
         ], className='ddown'),
     ], className="ddown-container"),
 
-    dcc.Loading(dcc.Graph(id='map', config={'scrollZoom': True}, style={'height': '60vh'}), type='circle'),
+    dcc.Loading(dcc.Graph(id='map', config={'scrollZoom': True}, style={'height': '55vh'}), type='circle'),
 
     dcc.RadioItems(
         id='graph-type',
@@ -78,7 +100,7 @@ app.layout = html.Div([
     ),
 
     html.Div([
-        dash_table.DataTable(id='table', style_cell=table_style, style_header=table_header_style),
+        # dash_table.DataTable(id='table', style_cell=table_style, style_header=table_header_style),
         dcc.Loading(dcc.Graph(id="graph-pie"), type="circle"),
         dcc.Loading(dcc.Graph(id="graph-bar"), type="circle"),
     ], className="table-pie-container"),
@@ -96,8 +118,8 @@ app.layout = html.Div([
 
 @app.callback(
     Output('map', 'figure'),
-    Output('table', 'columns'),
-    Output('table', 'data'),
+    # Output('table', 'columns'),
+    # Output('table', 'data'),
     Output("graph-pie", "figure"),
     Output("graph-bar", "figure"),  # New output for the bar chart
     Input('year_selector', 'value'),
@@ -107,16 +129,27 @@ def update_map(year, class_type):
     print(f"Collecting and displaying data for year {year}...")
     # convert mongo db collection to geopandas dataframe
     init = time.time()
-    docs = mc.get_docs_from_collection("properties.AccidentYear", str(year))
+    if year == "all":
+        docs = mc.get_all_docs_from_collection()
+    else:
+        docs = mc.get_docs_from_collection("properties.AccidentYear", str(year))
+
     gdf = pd.DataFrame(docs)
     print(f"Time to fetch data from MongodDB and convert to GeoDataFrame: {time.time() - init:.2f} seconds")
 
     init = time.time()
+    # # reformat geometry and properties columns
+    # df = pd.DataFrame.from_records(gdf['properties'].tolist())
+    # df_geo = pd.DataFrame.from_records(gdf['geometry'].tolist())
+    # df_geo = pd.DataFrame.from_records(df_geo['coordinates'].tolist())
+    # df_geo.rename(columns={1: "lat", 0: "lon"}, inplace=True)
+
     # reformat geometry and properties columns
-    df = pd.DataFrame.from_records(gdf['properties'].tolist())
-    df_geo = pd.DataFrame.from_records(gdf['geometry'].tolist())
-    df_geo = pd.DataFrame.from_records(df_geo['coordinates'].tolist())
+    df = pd.DataFrame([x for x in gdf['properties'].tolist() if x is not None and hasattr(x, '__iter__')])
+    df_geo = pd.DataFrame.from_records([x for x in gdf['geometry'].tolist() if x is not None and hasattr(x, '__iter__')])
+    df_geo = pd.DataFrame.from_records([x for x in df_geo['coordinates'].tolist() if x is not None and hasattr(x, '__iter__')])
     df_geo.rename(columns={1: "lat", 0: "lon"}, inplace=True)
+
     # combine the two dataframes
     gdf = pd.concat([df, df_geo], axis=1)
     print(f"Time to convert to DataFrame: {time.time() - init:.2f} seconds")
@@ -125,22 +158,21 @@ def update_map(year, class_type):
     counts = gdf['AccidentType_de'].value_counts()
     counts_severity = gdf['AccidentSeverityCategory_de'].value_counts()
 
-    # fig = px.density_mapbox(gdf, lat=gdf.lat, lon=gdf.lon, radius=10,
-    #                         custom_data=['AccidentType_de', 'AccidentSeverityCategory_de'],
-    #                         color_continuous_scale="inferno",
-    #                         )
     fig = px.scatter_mapbox(gdf, lat='lat', lon='lon',
                             color=class_type,
                             zoom=7,
-                            size=[10] * len(gdf),
+                            size=[5]*len(gdf),
                             mapbox_style="open-street-map",
                             color_continuous_scale="inferno",
                             hover_data=['AccidentType_de', 'AccidentSeverityCategory_de', 'AccidentInvolvingBicycle'],
+                            color_discrete_map=custom_colors,
                             )
+
     fig.update_traces(hovertemplate="Type: %{customdata[0]} "
                                     "<br>Severity: %{customdata[1]} "
                                     "<br>Coordinates: %{lat}, %{lon}",
                       )
+
     fig.update_layout(
         legend=dict(title="", orientation="h", y=-0.1, x=0.5, xanchor='center', yanchor='bottom'),
         coloraxis_showscale=False,
@@ -151,23 +183,24 @@ def update_map(year, class_type):
     )
 
     if class_type == "AccidentType_de":
-        columns = [{"name": "Unfallart Type", "id": "type"}, {"name": "count", "id": "count"}]
-        # convert counts to a dictionary for the table_data
-        table_data = [{"type": k, "count": v} for k, v in counts.items()]
+        # columns = [{"name": "Unfallart Type", "id": "type"}, {"name": "count", "id": "count"}]
+        # # convert counts to a dictionary for the table_data
+        # table_data = [{"type": k, "count": v} for k, v in counts.items()]
         labels = [k for k in counts.keys()]
         values = [v for v in counts.values]
 
     else:
-        columns = [{"name": "Unfallschwere", "id": "severity"}, {"name": "count", "id": "count"}]
-        # convert counts to a dictionary for the table_data
-        table_data = [{"severity": k, "count": v} for k, v in counts_severity.items()]
+        # columns = [{"name": "Unfallschwere", "id": "severity"}, {"name": "count", "id": "count"}]
+        # # convert counts to a dictionary for the table_data
+        # table_data = [{"severity": k, "count": v} for k, v in counts_severity.items()]
         labels = [k for k in counts_severity.keys()]
         values = [v for v in counts_severity.values]
 
     fig_pie = generate_chart(labels, values, "Pie")  # Always generate the pie chart
     fig_bar = generate_chart(labels, values, "Bar")  # Always generate the bar chart
 
-    return fig, columns, table_data, fig_pie, fig_bar  # Return both charts
+    # return fig, columns, table_data, fig_pie, fig_bar  # Return both charts
+    return fig, fig_pie, fig_bar  # Return both charts
 
 
 @app.callback(
@@ -180,6 +213,20 @@ def toggle_graphs(graph_type):
         return {'display': 'block'}, {'display': 'none'}
     else:
         return {'display': 'none'}, {'display': 'block'}
+
+
+# Add this callback to your callbacks
+@app.callback(
+    Output("modal", "is_open"),
+    [Input("year_selector", "value"),
+     Input("close", "n_clicks")],
+    [State("modal", "is_open")],
+)
+def toggle_modal(year, n, is_open):
+    if year == "all" or n:
+        return not is_open
+    else:
+        return False
 
 
 if __name__ == '__main__':

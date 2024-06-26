@@ -14,7 +14,7 @@ _TITLE = "Unfälle Schweiz"
 
 mc = MongoClient("unfaelle-schweiz-stats")
 
-# Use a Bootstrap CSS URL
+# Use a Bootstrap and custom CSS
 external_stylesheets = [dbc.themes.CYBORG, 'assets/style.css']
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
@@ -29,16 +29,18 @@ table_header_style = {'backgroundColor': 'transparent', 'color': 'lightgray', 't
                       'fontWeight': 'bold'}
 
 custom_colors = {
-    "Unfall mit Leichtverletzten": "LightGreen",
+    "Unfall mit Leichtverletzten": "LightBlue",
     "Unfall mit Schwerverletzten": "Gold",
     "Unfall mit Getöteten": "Crimson"
 }
 
-ddown_options = [{"label": "Fussgänger", "value": "pedestrianYearly"}, {"label": "Velos", "value": "bikesYearly"}]
+ddown_options = [{"label": "Fussgänger", "value": "pedestrianYearly"},
+                 {"label": "Velos", "value": "bikesYearly"},
+                 {"label": "All", "value": "allYearly"},]
 
 app.layout = html.Div([
     html.H3(_TITLE),
-    dcc.Dropdown(options=ddown_options, value="pedestrianYearly", id="cat_selector", className="ddown"),
+    dcc.Dropdown(options=ddown_options, value="allYearly", id="cat_selector", className="ddown"),
     dcc.Loading(dcc.Graph(id='graph', config={'scrollZoom': True}, style={'height': '55vh'}), type='circle'),
     dcc.Loading(dcc.Graph(id='graph-total', config={'scrollZoom': True}, style={'height': '30vh'}), type='circle'),
 ])
@@ -58,8 +60,14 @@ def update_map(cat):
     print(counts.columns)
     print(counts)
 
+    # Totals per Year
+    # sum all accidents per year using columns true and false
+    total_counts = counts.groupby(['AccidentSeverityCategory_de', 'AccidentYear']).sum().reset_index()
+    print("Totals:")
+    print(total_counts)
+
     # bar chart
-    fig = px.bar(counts, title="Accident Categories", x="AccidentType_de", y="count",
+    fig = px.bar(counts, title="", x="AccidentType_de", y="count",
                 animation_frame=variable, animation_group="AccidentType_de",
                 color="AccidentSeverityCategory_de", hover_name="AccidentType_de",
                 custom_data=['AccidentType_de', 'AccidentSeverityCategory_de', 'count'],
@@ -74,10 +82,11 @@ def update_map(cat):
                                     "<br>Severity: %{customdata[1]} "
                                     "<br>Count: %{customdata[2]}",
                       )
-    fig.update_yaxes(range=[0, 2500])
+
+    fig.update_yaxes(range=[0, counts['count'].max() + 1000])
     fig.update_xaxes(title="")
     fig.update_layout(
-        legend=dict(title="", orientation="h", y=0.95, x=0.5, xanchor='center', yanchor='bottom'),
+        legend=dict(title="", orientation="h", y=1, x=0.5, xanchor='center', yanchor='bottom'),
         coloraxis_showscale=False,
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
@@ -85,12 +94,6 @@ def update_map(cat):
         mapbox_style="open-street-map",
         margin={"r": 0, "t": 30, "l": 0, "b": 20},
     )
-
-    # Totals per Year
-    # sum all accidents per year using columns true and false
-    total_counts = counts.groupby(['AccidentSeverityCategory_de', 'AccidentYear']).sum().reset_index()
-    print("Totals:")
-    print(total_counts)
 
     fig_total = px.bar(total_counts, x='AccidentYear', y='count', title='Total Accidents',
                        color="AccidentSeverityCategory_de", hover_name="AccidentType_de",
@@ -108,7 +111,7 @@ def update_map(cat):
         paper_bgcolor='rgba(0,0,0,0)',
         font=dict(color='lightgray'),
         mapbox_style="open-street-map",
-        margin={"r": 0, "t": 50, "l": 0, "b": 20},
+        margin={"r": 50, "t": 50, "l": 0, "b": 20},
     )
     fig_total.update_xaxes(dtick=1, title="")
     fig_total.update_traces(textposition='outside',
