@@ -10,15 +10,14 @@ import dash_bootstrap_components as dbc
 
 from mongo_data_layer import MongoClient
 
-_TITLE = "Unfälle Schweiz"
+_TITLE = "Unfälle mit Personenschäden Schweiz 2011-2023"
 
 mc = MongoClient("unfaelle-schweiz-stats")
 
 # Use a Bootstrap and custom CSS
 external_stylesheets = [dbc.themes.CYBORG, 'assets/style.css']
 
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
-app.title = _TITLE
+app = dash.Dash(__name__, title=_TITLE, requests_pathname_prefix='/anim/', external_stylesheets=external_stylesheets)
 
 # Create the table style
 table_style = {'backgroundColor': 'transparent', 'color': 'lightgray', 'textAlign': 'left',
@@ -39,7 +38,10 @@ ddown_options = [{"label": "Fussgänger", "value": "pedestrianYearly"},
                  {"label": "All", "value": "allYearly"},]
 
 app.layout = html.Div([
-    html.H3(_TITLE),
+    html.H3([
+        _TITLE,
+        html.A("🗺", href="/map/", target="_blank", className="header-link")
+    ]),
     dcc.Dropdown(options=ddown_options, value="allYearly", id="cat_selector", className="ddown"),
     dcc.Loading(dcc.Graph(id='graph', config={'scrollZoom': True}, style={'height': '55vh'}), type='circle'),
     dcc.Loading(dcc.Graph(id='graph-total', config={'scrollZoom': True}, style={'height': '30vh'}), type='circle'),

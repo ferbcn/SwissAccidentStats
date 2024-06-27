@@ -45,10 +45,6 @@ class MongoClient():
 
 
 if "__main__" == __name__:
-    # client = MongoClient("test_collection")
-    # mock_documents = [{'key1': 'value1'}, {'key2': 'value2'}]
-    # result = client.insert_many_documents(mock_documents)
-    # print(len(result.inserted_ids))
     client = MongoClient("unfaelle-schweiz")
     cursor = client.get_most_recent_doc_from_collection()
     print(list(cursor))
