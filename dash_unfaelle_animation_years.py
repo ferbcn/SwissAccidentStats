@@ -40,7 +40,7 @@ ddown_options = [{"label": "Fussgänger", "value": "pedestrianYearly"},
 app.layout = html.Div([
     html.H3([
         _TITLE,
-        html.A("🗺", href="/map/", target="_blank", className="header-link")
+        html.A("🗺", href="/map/", className="header-link")
     ]),
     dcc.Dropdown(options=ddown_options, value="allYearly", id="cat_selector", className="ddown"),
     dcc.Loading(dcc.Graph(id='graph', config={'scrollZoom': True}, style={'height': '55vh'}), type='circle'),
