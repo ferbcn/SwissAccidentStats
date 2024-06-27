@@ -1,7 +1,7 @@
 import time
 import dash
 import pandas as pd
-from dash import html, dcc, dash_table, Input, Output, State
+from dash import html, dcc, Input, Output, State
 from plotly import express as px
 import plotly.graph_objects as go
 import dash_bootstrap_components as dbc
@@ -15,8 +15,7 @@ mc = MongoClient("unfaelle-schweiz")
 # Use a Bootstrap CSS URL
 external_stylesheets = [dbc.themes.CYBORG, 'assets/style.css']
 
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
-app.title = _TITLE
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets, title=_TITLE, requests_pathname_prefix='/map/')
 
 # Create the table style
 table_style = {'backgroundColor': 'transparent', 'color': 'lightgray', 'textAlign': 'left',
@@ -59,7 +58,8 @@ def generate_chart(labels, values, graph_type="Bar", severity=False):
                       paper_bgcolor='rgba(0,0,0,0)',
                       font=dict(color='lightgray'),
                       autosize=True,
-                      margin=dict(l=0, r=0, t=10, b=50),
+                      margin=dict(l=30, r=30, t=10, b=50),
+                      height=400,
                       )
     return fig
 
@@ -69,7 +69,7 @@ app.layout = html.Div([
     dbc.Modal(
         [
             dbc.ModalHeader("Notice"),
-            dbc.ModalBody("Long loading time!"),
+            dbc.ModalBody("You have selected a very large dataset, expect longer loading time!"),
             dbc.ModalFooter(
                 dbc.Button("Close", id="close", className="ml-auto")
             ),
@@ -77,7 +77,10 @@ app.layout = html.Div([
         id="modal",
     ),
 
-    html.H3(_TITLE),
+    html.H3([
+        _TITLE,
+        html.A("📊", href="/anim/", target="_blank", className="header-link")
+    ]),
     html.Div([
         html.Div([
             "Jahr: ", dcc.Dropdown(value="2023",
@@ -104,10 +107,9 @@ app.layout = html.Div([
     ),
 
     html.Div([
-        # dash_table.DataTable(id='table', style_cell=table_style, style_header=table_header_style),
         dcc.Loading(dcc.Graph(id="graph-pie"), type="circle"),
         dcc.Loading(dcc.Graph(id="graph-bar"), type="circle"),
-    ], className="table-pie-container"),
+    ], className="chart-container"),
     html.Div([
         html.Pre(children="Source: FEDRO - Federal Roads Office"),
         html.A(

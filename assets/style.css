@@ -2,12 +2,9 @@ body{
     padding: 20px;
 }
 
-.table-pie-container {
+.chart-container {
     display: flex;
-    flex-direction: row;
-    justify-content: space-around;
-    align-items: center;
-    flex-wrap: wrap;
+    flex-direction: column;
 }
 
 .ddown-container{
@@ -46,4 +43,8 @@ body{
 .source-link{
     margin-left: 10px;
     font-size: 14px;
+}
+
+.header-link{
+    margin: 0 20px;
 }

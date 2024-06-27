@@ -20,11 +20,6 @@ def collect_and_transform_data_to_dataframe():
 
     init = time.time()
     # reformat geometry and properties columns
-    # df = pd.DataFrame.from_records(gdf['properties'].tolist())
-    # df_geo = pd.DataFrame.from_records(gdf['geometry'].tolist())
-    # df_geo = pd.DataFrame.from_records(df_geo['coordinates'].tolist())
-    # df_geo.rename(columns={1: "lat", 0: "lon"}, inplace=True)
-    # reformat geometry and properties columns
     df = pd.DataFrame([x for x in gdf['properties'].tolist() if x is not None and hasattr(x, '__iter__')])
     df_geo = pd.DataFrame.from_records(
         [x for x in gdf['geometry'].tolist() if x is not None and hasattr(x, '__iter__')])
