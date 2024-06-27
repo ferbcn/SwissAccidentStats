@@ -79,7 +79,7 @@ app.layout = html.Div([
 
     html.H3([
         _TITLE,
-        html.A("📊", href="/anim/", target="_blank", className="header-link")
+        html.A("📊", href="/anim/", className="header-link")
     ]),
     html.Div([
         html.Div([
