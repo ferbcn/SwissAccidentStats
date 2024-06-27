@@ -13,7 +13,7 @@ app.mount("/", WSGIMiddleware(dash_app.server))
 
 @app.on_event("startup")
 def startup_event():
-    print("Starting Dash Appp...")
+    print("Starting Dash App...")
 
 
 # Start the FastAPI server
