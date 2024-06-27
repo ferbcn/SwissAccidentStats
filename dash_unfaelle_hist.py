@@ -4,7 +4,6 @@ from plotly import express as px
 import plotly.graph_objects as go
 import dash_bootstrap_components as dbc
 import pandas as pd
-from plotly.subplots import make_subplots
 
 # Use a Bootstrap CSS URL
 external_stylesheets = [dbc.themes.CYBORG, 'assets/style.css']
@@ -78,6 +77,6 @@ def update_map(year):
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=True, port=8051)
 
 
