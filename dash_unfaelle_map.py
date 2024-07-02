@@ -33,7 +33,7 @@ custom_colors = {
 
 
 ddown_options = [{"label": x, "value": str(x)} for x in range(2011, 2024)]
-ddown_options.append({"label": "All", "value": "all"})
+# ddown_options.append({"label": "All", "value": "all"})
 
 
 def generate_chart(labels, values, graph_type="Bar", severity=False):
@@ -78,8 +78,8 @@ app.layout = html.Div([
     ),
 
     html.H3([
-        _TITLE,
-        html.A("📊", href="/anim/", className="header-link")
+        "🗺", _TITLE,
+        html.A(html.Button("📊", id="link-button-anim", className="btn btn-secondary"), href="/anim/", className="header-link")
     ]),
     html.Div([
         html.Div([
