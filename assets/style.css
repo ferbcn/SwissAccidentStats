@@ -48,3 +48,17 @@ body{
 .header-link{
     margin: 0 20px;
 }
+
+.btn-secondary{
+    font-size: 20px;
+    width: 70px;
+}
+
+.btn-secondary:hover{
+    background-color: #f0f0f0;
+}
+
+h3{
+    display: flex;
+    justify-content: space-between;
+}
