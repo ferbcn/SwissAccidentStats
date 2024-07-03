@@ -52,10 +52,23 @@ body{
 .btn-secondary{
     font-size: 20px;
     width: 70px;
+    animation: flash 1s forwards;
+    border-radius: 0;
+    background-color: #f0f0f0;
+}
+
+/* flash animation on button */
+@keyframes flash {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0;
+    }
 }
 
 .btn-secondary:hover{
-    background-color: #f0f0f0;
+    background-color: lightblue;
 }
 
 h3{

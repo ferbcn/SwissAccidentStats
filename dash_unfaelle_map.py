@@ -78,8 +78,9 @@ app.layout = html.Div([
     ),
 
     html.H3([
-        "🗺", _TITLE,
-        html.A(html.Button("📊", id="link-button-anim", className="btn btn-secondary"), href="/anim/", className="header-link")
+        "🗺 ", _TITLE,
+        html.A(html.Button("📊", className="btn btn-secondary"), href="/anim/",
+               className="header-link")
     ]),
     html.Div([
         html.Div([

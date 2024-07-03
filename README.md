@@ -2,7 +2,7 @@
 
 ## Tech Stack
 * Uvicorn/FastApi
-* Plotly Dash
+* Plotly-Dash
 * MongoDB
 
 ## Data Source
