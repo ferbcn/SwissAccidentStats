@@ -12,3 +12,4 @@
 
 ![Screenshot](assets/screen.png)
 
+[https://swissdata.xyz/](https://swissdata.xyz/)
